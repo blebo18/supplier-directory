@@ -129,7 +129,8 @@ export default function Home() {
                 value={searchQuery}
                 onChange={(e) => setSearchQuery(e.target.value)}
                 placeholder="Search suppliers..."
-                className="flex-1 px-4 py-3 text-sm rounded-lg border border-gray-300 focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none transition text-gray-900 placeholder-gray-400"
+                className="flex-1 px-4 py-3 rounded-lg border border-gray-300 focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none transition placeholder-gray-400"
+                style={{ color: "#ffffff", fontSize: "20px", fontWeight: 800 }}
               />
               <button
                 type="submit"

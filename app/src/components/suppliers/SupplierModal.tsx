@@ -1,7 +1,7 @@
 "use client";
 
 import { useState, useEffect } from "react";
-import { Supplier, SupplierImage, SupplierVideo, SupplierDocument } from "@/lib/types";
+import { Supplier, SupplierImage, SupplierVideo, SupplierDocument, SupplierLink } from "@/lib/types";
 import { useAuth } from "@/components/auth/AuthProvider";
 import ContactForm from "@/components/contact/ContactForm";
 import SupplierEditForm from "./SupplierEditForm";
@@ -11,6 +11,8 @@ import VideoPlayer from "@/components/media/VideoPlayer";
 import VideoManager from "@/components/media/VideoManager";
 import DocumentList from "@/components/media/DocumentList";
 import DocumentUploader from "@/components/media/DocumentUploader";
+import LinkList from "@/components/media/LinkList";
+import LinkManager from "@/components/media/LinkManager";
 
 interface SupplierModalProps {
   supplier: Supplier;
@@ -25,6 +27,7 @@ export default function SupplierModal({ supplier, onClose, onCategoryClick, onUp
   const [images, setImages] = useState<SupplierImage[]>([]);
   const [videos, setVideos] = useState<SupplierVideo[]>([]);
   const [documents, setDocuments] = useState<SupplierDocument[]>([]);
+  const [links, setLinks] = useState<SupplierLink[]>([]);
   const { isEditor } = useAuth();
 
   // Fetch full details including media + track view
@@ -36,6 +39,7 @@ export default function SupplierModal({ supplier, onClose, onCategoryClick, onUp
         setImages(data.images || []);
         setVideos(data.videos || []);
         setDocuments(data.documents || []);
+        setLinks(data.links || []);
       });
 
     // Track view
@@ -123,6 +127,11 @@ export default function SupplierModal({ supplier, onClose, onCategoryClick, onUp
                 documents={documents}
                 onDocumentsChange={setDocuments}
               />
+              <LinkManager
+                supplierId={current.id}
+                links={links}
+                onLinksChange={setLinks}
+              />
             </div>
           </>
         ) : (
@@ -185,6 +194,9 @@ export default function SupplierModal({ supplier, onClose, onCategoryClick, onUp
 
             {/* Documents */}
             {documents.length > 0 && <DocumentList supplierId={current.id} documents={documents} />}
+
+            {/* External Links */}
+            {links.length > 0 && <LinkList links={links} />}
 
             {/* Categories */}
             {current.categories.length > 0 && (

@@ -50,6 +50,7 @@ model Supplier {
   contactMessages ContactMessage[]
   views           SupplierView[]
   clicks          WebLinkClick[]
+  links           SupplierLink[]
 
   @@index([company])
   @@index([state])
@@ -171,6 +172,18 @@ model AdClick {
 
   @@index([adId])
   @@index([clickedAt])
+}
+
+model SupplierLink {
+  id         Int      @id @default(autoincrement())
+  supplierId Int
+  title      String
+  url        String
+  sortOrder  Int      @default(0)
+  createdAt  DateTime @default(now())
+  supplier   Supplier @relation(fields: [supplierId], references: [id], onDelete: Cascade)
+
+  @@index([supplierId])
 }
 
 model SiteSetting {

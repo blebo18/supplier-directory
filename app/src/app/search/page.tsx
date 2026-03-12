@@ -10,7 +10,7 @@ import SupplierModal from "@/components/suppliers/SupplierModal";
 import Pagination from "@/components/suppliers/Pagination";
 import { useAuth } from "@/components/auth/AuthProvider";
 import AuthModal from "@/components/auth/AuthModal";
-import LeaderboardAd from "@/components/ads/LeaderboardAd";
+import { useAds as useLeaderboardAds } from "@/components/ads/useAds";
 import SidebarAd from "@/components/ads/SidebarAd";
 import { useAds } from "@/components/ads/useAds";
 import Link from "next/link";
@@ -33,6 +33,7 @@ function SearchContent() {
   const { user, logout, isAdmin } = useAuth();
 
   const { ads: gridAds, trackClick: trackGridClick } = useAds("GRID", 2);
+  const { ads: leaderboardAds, trackClick: trackLeaderboardClick } = useLeaderboardAds("LEADERBOARD", 6);
 
   useEffect(() => {
     fetch("/api/settings")
@@ -177,7 +178,28 @@ function SearchContent() {
             </div>
           </div>
 
-          <LeaderboardAd />
+          {leaderboardAds.length > 0 && (
+            <div className="mb-4">
+              <div className="flex flex-wrap justify-center gap-6">
+                {leaderboardAds.map((ad) => (
+                  <button
+                    key={ad.id}
+                    onClick={() => {
+                      trackLeaderboardClick(ad.id);
+                      window.open(ad.destinationUrl, "_blank", "noopener,noreferrer");
+                    }}
+                    className="w-[150px] h-[150px] rounded-lg border border-gray-200 bg-white overflow-hidden hover:shadow-lg hover:border-gray-300 transition flex items-center justify-center p-3"
+                  >
+                    <img
+                      src={ad.imageUrl}
+                      alt={ad.name}
+                      className="max-w-full max-h-full object-contain"
+                    />
+                  </button>
+                ))}
+              </div>
+            </div>
+          )}
 
           <SupplierGrid
             suppliers={data?.items || []}

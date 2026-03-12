@@ -17,6 +17,7 @@ export interface Supplier {
   images?: SupplierImage[];
   videos?: SupplierVideo[];
   documents?: SupplierDocument[];
+  links?: SupplierLink[];
 }
 
 export interface SupplierImage {
@@ -37,6 +38,13 @@ export interface SupplierDocument {
   filename: string;
   title: string | null;
   fileSize: number;
+}
+
+export interface SupplierLink {
+  id: number;
+  title: string;
+  url: string;
+  sortOrder: number;
 }
 
 export type AdPlacement = "GRID" | "SIDEBAR" | "LEADERBOARD";

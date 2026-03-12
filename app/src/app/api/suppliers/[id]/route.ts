@@ -21,6 +21,7 @@ export async function GET(
       images: { orderBy: { sortOrder: "asc" } },
       videos: { orderBy: { createdAt: "desc" } },
       documents: { orderBy: { createdAt: "desc" } },
+      links: { orderBy: { sortOrder: "asc" } },
     },
   });
 
@@ -60,6 +61,12 @@ export async function GET(
       filename: d.filename,
       title: d.title,
       fileSize: d.fileSize,
+    })),
+    links: supplier.links.map((l) => ({
+      id: l.id,
+      title: l.title,
+      url: l.url,
+      sortOrder: l.sortOrder,
     })),
   });
 }
