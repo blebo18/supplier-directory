@@ -30,7 +30,7 @@ export default function DocumentList({ supplierId, documents }: DocumentListProp
               <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8l-6-6zM6 20V4h7v5h5v11H6z" />
             </svg>
             <span className="text-sm text-gray-700 group-hover:text-blue-600 truncate flex-1">
-              {doc.filename}
+              {doc.title || doc.filename}
             </span>
             <span className="text-xs text-gray-400 shrink-0">
               {formatFileSize(doc.fileSize)}

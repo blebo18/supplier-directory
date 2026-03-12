@@ -27,6 +27,7 @@ export async function POST(
 
   const formData = await request.formData();
   const file = formData.get("file") as File | null;
+  const title = (formData.get("title") as string | null)?.trim() || null;
 
   if (!file) {
     return NextResponse.json({ error: "No file provided" }, { status: 400 });
@@ -52,6 +53,7 @@ export async function POST(
     data: {
       supplierId,
       filename: file.name,
+      title,
       storagePath,
       fileSize: file.size,
     },
@@ -60,6 +62,7 @@ export async function POST(
   return NextResponse.json({
     id: doc.id,
     filename: doc.filename,
+    title: doc.title,
     fileSize: doc.fileSize,
   });
 }

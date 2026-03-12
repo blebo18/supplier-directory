@@ -1,0 +1,54 @@
+services:
+  db:
+    image: postgres:16-alpine
+    restart: unless-stopped
+    ports:
+      - "5433:5432"
+    environment:
+      POSTGRES_USER: supplier
+      POSTGRES_PASSWORD: supplier
+      POSTGRES_DB: supplier_directory
+    volumes:
+      - pgdata:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U supplier -d supplier_directory"]
+      interval: 3s
+      timeout: 3s
+      retries: 10
+
+  app:
+    build:
+      context: ./app
+      dockerfile: Dockerfile
+    restart: unless-stopped
+    ports:
+      - "3075:3000"
+    environment:
+      DATABASE_URL: postgresql://supplier:supplier@db:5432/supplier_directory?schema=public
+      JWT_SECRET: supplier-directory-jwt-secret-change-in-production
+    volumes:
+      - uploads:/app/public/uploads
+    depends_on:
+      db:
+        condition: service_healthy
+
+  studio:
+    build:
+      context: .
+      dockerfile: studio-proxy/Dockerfile
+    restart: unless-stopped
+    ports:
+      - "5555:5555"
+    environment:
+      DATABASE_URL: postgresql://supplier:supplier@db:5432/supplier_directory?schema=public
+      JWT_SECRET: supplier-directory-jwt-secret-change-in-production
+      APP_ORIGIN: http://app:3000
+    depends_on:
+      db:
+        condition: service_healthy
+      app:
+        condition: service_started
+
+volumes:
+  pgdata:
+  uploads:

@@ -8,7 +8,7 @@ set -euo pipefail
 # ============================================================================
 
 APP_NAME="supplier-directory"
-REPO_URL="git@github.com:blebo18/supplier-directory-.git"
+REPO_URL="git@github.com:blebo18/supplier-directory.git"
 DEPLOY_DIR="/opt/${APP_NAME}"
 APP_DIR="${DEPLOY_DIR}/app"
 APP_USER="supplierapp"
@@ -154,7 +154,7 @@ else
     if sudo -u "${APP_USER}" git ls-remote "${REPO_URL}" &>/dev/null; then
         sudo -u "${APP_USER}" git clone "${REPO_URL}" "${DEPLOY_DIR}.tmp"
     else
-        HTTPS_URL="https://github.com/blebo18/supplier-directory-.git"
+        HTTPS_URL="https://github.com/blebo18/supplier-directory.git"
         warn "SSH key not available for ${APP_USER}, trying HTTPS..."
         sudo -u "${APP_USER}" git clone "${HTTPS_URL}" "${DEPLOY_DIR}.tmp"
     fi
@@ -188,21 +188,24 @@ chown "${APP_USER}:${APP_USER}" "${APP_DIR}/.env"
 info "Installing npm dependencies..."
 sudo -u "${APP_USER}" npm ci --prefix "${APP_DIR}"
 
-info "Running database migrations..."
-sudo -u "${APP_USER}" npx --prefix "${APP_DIR}" prisma migrate deploy
-
 info "Generating Prisma client..."
 sudo -u "${APP_USER}" npx --prefix "${APP_DIR}" prisma generate
 
-info "Creating admin user..."
-sudo -u "${APP_USER}" npx --prefix "${APP_DIR}" tsx "${APP_DIR}/scripts/create-admin.ts" || warn "Admin user creation failed (may already exist)"
+info "Running database migrations..."
+sudo -u "${APP_USER}" npx --prefix "${APP_DIR}" prisma migrate deploy
+
+# Create uploads directories before build (Next.js copies public/ during build)
+mkdir -p "${APP_DIR}/public/uploads/images" \
+         "${APP_DIR}/public/uploads/documents" \
+         "${APP_DIR}/public/uploads/ads" \
+         "${APP_DIR}/public/uploads/site"
+chown -R "${APP_USER}:${APP_USER}" "${APP_DIR}/public/uploads"
 
 info "Building application..."
 sudo -u "${APP_USER}" npm run --prefix "${APP_DIR}" build
 
-# Create uploads directory
-mkdir -p "${APP_DIR}/public/uploads/images" "${APP_DIR}/public/uploads/documents"
-chown -R "${APP_USER}:${APP_USER}" "${APP_DIR}/public/uploads"
+info "Creating admin user..."
+sudo -u "${APP_USER}" npx --prefix "${APP_DIR}" tsx "${APP_DIR}/scripts/create-admin.ts" || warn "Admin user creation failed (may already exist)"
 
 # ============================================================================
 # 8. PM2 process manager

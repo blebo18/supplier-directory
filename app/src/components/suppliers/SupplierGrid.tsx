@@ -2,14 +2,27 @@
 
 import { Supplier } from "@/lib/types";
 import SupplierCard from "./SupplierCard";
+import GridAd from "@/components/ads/GridAd";
+
+interface GridAdEntry {
+  ad: {
+    id: number;
+    imageUrl: string;
+    destinationUrl: string;
+    name: string;
+  };
+  position: number;
+}
 
 interface SupplierGridProps {
   suppliers: Supplier[];
   loading: boolean;
   onSelect: (supplier: Supplier) => void;
+  gridAds?: GridAdEntry[];
+  onAdClick?: (adId: number) => void;
 }
 
-export default function SupplierGrid({ suppliers, loading, onSelect }: SupplierGridProps) {
+export default function SupplierGrid({ suppliers, loading, onSelect, gridAds, onAdClick }: SupplierGridProps) {
   if (loading) {
     return (
       <div className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-3 gap-4">
@@ -33,15 +46,41 @@ export default function SupplierGrid({ suppliers, loading, onSelect }: SupplierG
     );
   }
 
-  return (
-    <div className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-3 gap-4">
-      {suppliers.map((supplier) => (
+  // Build interleaved list of suppliers and ads
+  const items: React.ReactNode[] = [];
+  const adsByPosition = new Map<number, GridAdEntry>();
+  gridAds?.forEach((ga) => adsByPosition.set(ga.position, ga));
+
+  let supplierIndex = 0;
+  let position = 0;
+
+  while (supplierIndex < suppliers.length) {
+    const adEntry = adsByPosition.get(position);
+    if (adEntry) {
+      items.push(
+        <GridAd
+          key={`ad-${adEntry.ad.id}`}
+          ad={adEntry.ad}
+          onTrackClick={onAdClick || (() => {})}
+        />
+      );
+    } else {
+      const supplier = suppliers[supplierIndex];
+      items.push(
         <SupplierCard
           key={supplier.id}
           supplier={supplier}
           onClick={() => onSelect(supplier)}
         />
-      ))}
+      );
+      supplierIndex++;
+    }
+    position++;
+  }
+
+  return (
+    <div className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-3 gap-4">
+      {items}
     </div>
   );
 }

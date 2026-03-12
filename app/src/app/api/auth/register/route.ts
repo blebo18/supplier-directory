@@ -22,14 +22,19 @@ export async function POST(request: NextRequest) {
 
   const { name, email, password } = parsed.data;
 
+  // Public registration is only allowed for the first user (initial admin setup).
+  // All other users must be created by an admin via /api/admin/users.
+  const userCount = await prisma.user.count();
+  if (userCount > 0) {
+    return NextResponse.json({ error: "Registration is disabled. Contact an administrator." }, { status: 403 });
+  }
+
   const existing = await prisma.user.findUnique({ where: { email } });
   if (existing) {
     return NextResponse.json({ error: "Email already registered" }, { status: 409 });
   }
 
-  // First user gets ADMIN role
-  const userCount = await prisma.user.count();
-  const role = userCount === 0 ? "ADMIN" : "VIEWER";
+  const role = "ADMIN";
 
   const user = await prisma.user.create({
     data: {

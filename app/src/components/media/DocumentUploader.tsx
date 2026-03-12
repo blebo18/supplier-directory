@@ -20,6 +20,7 @@ export default function DocumentUploader({ supplierId, documents, onDocumentsCha
   const { token } = useAuth();
   const [uploading, setUploading] = useState(false);
   const [error, setError] = useState("");
+  const [title, setTitle] = useState("");
   const fileRef = useRef<HTMLInputElement>(null);
 
   const handleUpload = async (file: File) => {
@@ -29,6 +30,7 @@ export default function DocumentUploader({ supplierId, documents, onDocumentsCha
     try {
       const formData = new FormData();
       formData.append("file", file);
+      if (title.trim()) formData.append("title", title.trim());
 
       const res = await fetch(`/api/suppliers/${supplierId}/documents`, {
         method: "POST",
@@ -37,13 +39,18 @@ export default function DocumentUploader({ supplierId, documents, onDocumentsCha
       });
 
       if (!res.ok) {
-        const data = await res.json();
-        setError(data.error || "Upload failed");
+        try {
+          const data = await res.json();
+          setError(data.error || "Upload failed");
+        } catch {
+          setError(`Upload failed (${res.status})`);
+        }
         return;
       }
 
       const doc = await res.json();
       onDocumentsChange([...documents, doc]);
+      setTitle("");
     } finally {
       setUploading(false);
       if (fileRef.current) fileRef.current.value = "";
@@ -76,7 +83,7 @@ export default function DocumentUploader({ supplierId, documents, onDocumentsCha
               <svg className="w-4 h-4 text-red-500 shrink-0" fill="currentColor" viewBox="0 0 24 24">
                 <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8l-6-6zM6 20V4h7v5h5v11H6z" />
               </svg>
-              <span className="truncate flex-1 text-gray-700">{doc.filename}</span>
+              <span className="truncate flex-1 text-gray-700">{doc.title || doc.filename}</span>
               <span className="text-xs text-gray-400">{formatFileSize(doc.fileSize)}</span>
               <button
                 onClick={() => handleDelete(doc.id)}
@@ -89,17 +96,26 @@ export default function DocumentUploader({ supplierId, documents, onDocumentsCha
         </div>
       )}
 
-      <label className="inline-flex items-center gap-2 px-3 py-1.5 text-sm border border-gray-300 rounded-lg cursor-pointer hover:bg-gray-50 transition">
+      <div className="flex items-center gap-2">
         <input
-          ref={fileRef}
-          type="file"
-          accept="application/pdf"
-          className="hidden"
-          onChange={(e) => e.target.files?.[0] && handleUpload(e.target.files[0])}
-          disabled={uploading}
+          type="text"
+          placeholder="Document title (optional)"
+          value={title}
+          onChange={(e) => setTitle(e.target.value)}
+          className="flex-1 px-3 py-1.5 text-sm border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none transition text-gray-900 placeholder-gray-400"
         />
-        {uploading ? "Uploading..." : "Upload PDF"}
-      </label>
+        <label className="inline-flex items-center gap-2 px-3 py-1.5 text-sm border border-gray-300 rounded-lg cursor-pointer hover:bg-gray-50 transition shrink-0">
+          <input
+            ref={fileRef}
+            type="file"
+            accept="application/pdf"
+            className="hidden"
+            onChange={(e) => e.target.files?.[0] && handleUpload(e.target.files[0])}
+            disabled={uploading}
+          />
+          {uploading ? "Uploading..." : "Upload PDF"}
+        </label>
+      </div>
     </div>
   );
 }
