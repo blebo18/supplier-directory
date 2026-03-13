@@ -25,7 +25,13 @@ export async function GET(request: NextRequest) {
   }
 
   if (query) {
-    where.company = { contains: query, mode: "insensitive" };
+    where.OR = [
+      { company: { contains: query, mode: "insensitive" } },
+      { state: { contains: query, mode: "insensitive" } },
+      { city: { contains: query, mode: "insensitive" } },
+      { description: { contains: query, mode: "insensitive" } },
+      { categories: { some: { category: { name: { contains: query, mode: "insensitive" } } } } },
+    ];
   }
 
   if (category) {
