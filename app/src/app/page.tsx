@@ -121,7 +121,7 @@ export default function Home() {
               Find the Right Supplier
             </h2>
             <p className="text-lg text-gray-200 mb-8 max-w-2xl mx-auto">
-              Browse our comprehensive directory of manufacturing suppliers. Search by name, category, or location.
+              Browse our comprehensive directory of manufacturing suppliers.<br />Search by name, category, or location.
             </p>
             <form onSubmit={handleSearch} className="max-w-xl mx-auto flex gap-3">
               <input
